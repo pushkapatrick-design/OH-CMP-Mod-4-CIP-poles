@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIP Pole Identification Slide</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #08111f;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    #sl-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,0.18), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(14,165,233,0.12), transparent 24%),
+        linear-gradient(135deg, #08111f 0%, #0f1d33 45%, #122949 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #sl-stage {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,0.18), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(14,165,233,0.12), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+        linear-gradient(135deg, #07101d 0%, #102540 38%, #0d3c66 100%);
+      color: #e8f1ff;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    }
+
+    .grid-overlay::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .hero-glow {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .panel-glass {
+      background: linear-gradient(180deg, rgba(8, 20, 38, 0.82), rgba(9, 24, 46, 0.92));
+      border: 1px solid rgba(148, 197, 255, 0.18);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 20px 50px rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+    }
+
+    .pill {
+      background: rgba(56, 189, 248, 0.12);
+      color: #bfe9ff;
+      border: 1px solid rgba(125, 211, 252, 0.24);
+    }
+
+    .tab-btn {
+      transition: all 220ms ease;
+      border: 1px solid rgba(148, 197, 255, 0.16);
+      background: rgba(255,255,255,0.05);
+      color: #d7e9ff;
+    }
+
+    .tab-btn:hover,
+    .tab-btn:focus-visible {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(125, 211, 252, 0.4);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
+    }
+
+    .content-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+      border: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .bullet:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .bullet-icon {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, rgba(56,189,248,0.22), rgba(59,130,246,0.22));
+      border: 1px solid rgba(125,211,252,0.25);
+      color: #c7f0ff;
+      margin-top: 2px;
+    }
+
+    .image-frame {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(148, 197, 255, 0.18);
+      box-shadow: 0 24px 40px rgba(0,0,0,0.22);
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-badge {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      background: rgba(6, 16, 30, 0.82);
+      border: 1px solid rgba(148, 197, 255, 0.2);
+      color: #dff4ff;
+      border-radius: 9999px;
+      padding: 10px 16px;
+      font-size: 18px;
+      letter-spacing: 0.03em;
+    }
+
+    .fade-up {
+      animation: fadeUp 700ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    .delay-1 { animation-delay: 0.15s; }
+    .delay-2 { animation-delay: 0.35s; }
+    .delay-3 { animation-delay: 0.55s; }
+    .delay-4 { animation-delay: 0.75s; }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stagger-child {
+      animation: fadeUp 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .tab-btn {
+      animation: fadeUp 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      opacity: 0;
+    }
+
+    .tab-btn:nth-child(1) { animation-delay: 0.45s; }
+    .tab-btn:nth-child(2) { animation-delay: 0.5s; }
+    .tab-btn:nth-child(3) { animation-delay: 0.55s; }
+
+    .hotspot {
+      display: none;
+    }
+
+    .callout {
+      display: none;
+    }
+
+    .mini-label {
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #7dd3fc;
+    }
+
+    .footer-note {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 9999px;
+      display: inline-block;
+    }
+
+    .image-frame {
+      cursor: pointer;
+    }
+
+    .image-frame:hover {
+      opacity: 0.9;
+      transition: opacity 220ms ease;
+    }
+
+    .image-frame::after {
+      content: "";
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      background: rgba(56, 189, 248, 0.18);
+      border: 1.5px solid rgba(125, 211, 252, 0.4);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      transition: all 220ms ease;
+    }
+
+    .image-frame:hover::after {
+      opacity: 1;
+      background: rgba(56, 189, 248, 0.28);
+      border-color: rgba(125, 211, 252, 0.6);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+
+    .modal-content img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 220ms ease;
+      z-index: 10000;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full">
+  <div id="sl-wrapper" aria-label="Interactive e-learning slide wrapper">
+   <div id="sl-stage" class="grid-overlay">
+    <div class="hero-glow" style="width:460px;height:460px;left:-80px;top:-100px;background:rgba(56,189,248,0.16);"></div>
+    <div class="hero-glow" style="width:520px;height:520px;right:-120px;top:120px;background:rgba(37,99,235,0.16);"></div>
+    <header class="absolute left-0 top-0 w-full px-20 pt-16">
+     <div class="flex items-start justify-between">
+      <div class="max-w-[1100px]">
+       <h1 class="text-[58px] leading-[1.05] font-bold tracking-[-0.03em] text-white fade-up">CIP Owned Poles</h1>
+       <div class="mt-6 fade-up delay-1">
+        <img src="https://raw.githubusercontent.com/pushkapatrick-design/ancillary-providers/main/Screenshot%202026-02-24%20134104.png" alt="Reference image for pole identification" loading="lazy" style="max-width: 500px; height: auto; border-radius: 12px;" onerror="this.style.display='none';">
+       </div>
+      </div>
+     </div>
+    </header>
+    <main class="absolute left-0 top-[270px] w-full px-20 pb-16">
+     <div class="grid grid-cols-[720px_1fr] gap-10">
+      <section class="panel-glass rounded-[34px] p-8 h-[820px] fade-up delay-2" aria-labelledby="learning-panel-title">
+       <div class="flex items-center justify-between">
+        <div>
+         <div class="mini-label">
+          Interactive guide
+         </div>
+         <h2 id="learning-panel-title" class="mt-2 text-[34px] font-bold text-white">Tap through the key differences</h2>
+        </div>
+        <div class="footer-note rounded-full px-4 py-2 text-[16px] text-slate-200">
+         1 of 3 topics shown
+        </div>
+       </div>
+       <div class="mt-7 flex gap-3" role="tablist" aria-label="Pole inspection topics">
+        <button class="tab-btn active rounded-2xl px-5 py-3 text-[18px] font-semibold" role="tab" aria-selected="true" aria-controls="panel-ownership" id="tab-ownership" data-tab="ownership"> Pole ID tags </button> <button class="tab-btn rounded-2xl px-5 py-3 text-[18px] font-semibold" role="tab" aria-selected="false" aria-controls="panel-clearance" id="tab-clearance" data-tab="clearance"> Clearances </button> <button class="tab-btn rounded-2xl px-5 py-3 text-[18px] font-semibold" role="tab" aria-selected="false" aria-controls="panel-strain" id="tab-strain" data-tab="strain"> Leaning &amp; strain </button>
+       </div>
+       <div class="mt-8">
+        <article id="panel-ownership" class="tab-panel content-card rounded-[28px] p-7" role="tabpanel" aria-labelledby="tab-ownership">
+         <div class="mini-label">
+          Ownership identification
+         </div>
+         <h3 class="mt-2 text-[30px] font-bold text-white">How to tell SDG&amp;E and CIP-owned poles apart</h3>
+         <div class="mt-5 space-y-1 text-[22px] leading-[1.55] text-slate-200">
+          <div class="bullet">
+           <div class="bullet-icon"><i data-lucide="tag"></i>
+           </div>
+           <p>AT&amp;T owned poles with SDG&amp;E attachments are identified with a <span class="text-sky-300 font-semibold">“J” suffix in Geocall</span>.</p>
+          </div>
+          <div class="bullet">
+           <div class="bullet-icon"><i data-lucide="badge-check"></i>
+           </div>
+           <p>These poles should show a <span class="text-sky-300 font-semibold">“J” suffix on the SDG&amp;E tag</span>, while the AT&amp;T tag may use a <span class="text-sky-300 font-semibold">“JP” prefix</span>.</p>
+          </div>
+          <div class="bullet">
+           <div class="bullet-icon"><i data-lucide="git-branch"></i>
+           </div>
+           <p>CIP-owned poles placed <span class="text-sky-300 font-semibold">inter-set between SDG&amp;E poles</span> need extra attention during inspection.</p>
+          </div>
+         </div>
+        </article>
+        <article id="panel-clearance" class="tab-panel content-card rounded-[28px] p-7 hidden" role="tabpanel" aria-labelledby="tab-clearance">
+         <div class="mini-label">
+          Inspection requirement
+         </div>
+         <h3 class="mt-2 text-[30px] font-bold text-white">Clearances to inspect on inter-set CIP poles</h3>
+         <div class="mt-5 space-y-1 text-[22px] leading-[1.55] text-slate-200">
+          <div class="bullet stagger-child" style="animation-delay: 0.7s;">
+           <div class="bullet-icon"><i data-lucide="ruler"></i>
+           </div>
+           <p>Check <span class="text-sky-300 font-semibold">ground clearances</span> of the CIP conductors on poles located between SDG&amp;E poles.</p>
+          </div>
+          <div class="bullet stagger-child" style="animation-delay: 0.8s;">
+           <div class="bullet-icon"><i data-lucide="move-diagonal-2"></i>
+           </div>
+           <p>Also inspect <span class="text-sky-300 font-semibold">wire-to-wire clearances</span> to make sure spacing remains safe and compliant.</p>
+          </div>
+          <div class="bullet stagger-child" style="animation-delay: 0.9s;">
+           <div class="bullet-icon"><i data-lucide="search-check"></i>
+           </div>
+           <p>These checks are especially important where CIP conductors pass through spans influenced by nearby SDG&amp;E structures.</p>
+          </div>
+         </div>
+        </article>
+        <article id="panel-strain" class="tab-panel content-card rounded-[28px] p-7 hidden" role="tabpanel" aria-labelledby="tab-strain">
+         <div class="mini-label">
+          Condition assessment
+         </div>
+         <h3 class="mt-2 text-[30px] font-bold text-white">Signs a CIP pole may be stressing SDG&amp;E poles</h3>
+         <div class="mt-5 space-y-1 text-[22px] leading-[1.55] text-slate-200">
+          <div class="bullet stagger-child" style="animation-delay: 0.7s;">
+           <div class="bullet-icon"><i data-lucide="tower-control"></i>
+           </div>
+           <p>Look for a CIP pole that is <span class="text-sky-300 font-semibold">leaning</span> and transferring force to adjacent SDG&amp;E poles.</p>
+          </div>
+          <div class="bullet stagger-child" style="animation-delay: 0.8s;">
+           <div class="bullet-icon"><i data-lucide="alert-triangle"></i>
+           </div>
+           <p>Check for <span class="text-sky-300 font-semibold">damage</span> that could create unnecessary strain on the connected line path.</p>
+          </div>
+          <div class="bullet stagger-child" style="animation-delay: 0.9s;">
+           <div class="bullet-icon"><i data-lucide="shield-alert"></i>
+           </div>
+           <p>If the inter-set CIP pole appears unstable, note the issue and evaluate how it may affect both <span class="text-sky-300 font-semibold">support</span> and <span class="text-sky-300 font-semibold">clearance</span>.</p>
+          </div>
+         </div>
+        </article>
+       </div>
+      </section>
+      <section class="relative h-[690px] fade-up delay-3" aria-labelledby="visual-panel-title">
+       <div class="sr-only">
+        <h2 id="visual-panel-title">Reference visuals and interactive hotspots</h2>
+       </div>
+       <div class="grid grid-cols-2 gap-6 h-full">
+        <div class="image-frame h-[332px]">
+         <img src="https://raw.githubusercontent.com/pushkapatrick-design/OH-CMP-Mod-4-CIP-poles/main/CIP%20poles%202.png" alt="Reference image showing pole tagging and ownership indicators" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#0f172a,#1e3a8a)';this.alt='Reference image unavailable';"> <i data-lucide="expand" style="width: 20px; height: 20px; position: absolute; bottom: 24px; right: 24px; color: #7dd3fc;"></i>
+        </div>
+        <div class="image-frame h-[332px]">
+         <img src="https://raw.githubusercontent.com/pushkapatrick-design/OH-CMP-Mod-4-CIP-poles/main/CIP%20poles%203.png" alt="Reference image showing a CIP pole located between SDG&amp;E poles" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#0f172a,#1e3a8a)';this.alt='Reference image unavailable';"> <i data-lucide="expand" style="width: 20px; height: 20px; position: absolute; bottom: 24px; right: 24px; color: #7dd3fc;"></i>
+        </div>
+        <div class="image-frame col-span-2 h-[332px]" id="interactive-visual">
+         <img src="https://raw.githubusercontent.com/pushkapatrick-design/OH-CMP-Mod-4-CIP-poles/main/CIP%20poles.png" alt="Reference image used for inspection hotspots related to tags, clearances, and leaning strain" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#0f172a,#1e3a8a)';this.alt='Reference image unavailable';"> <i data-lucide="expand" style="width: 20px; height: 20px; position: absolute; bottom: 24px; right: 24px; color: #7dd3fc;"></i> <button class="hotspot" style="left: 22%; top: 21%; width: 34px; height: 34px;" data-callout="callout-tags" aria-label="Show callout for ownership tags"></button> <button class="hotspot" style="left: 50%; top: 28%; width: 34px; height: 34px;" data-callout="callout-clearance" aria-label="Show callout for conductor clearance"></button> <button class="hotspot" style="left: 76%; top: 58%; width: 34px; height: 34px;" data-callout="callout-strain" aria-label="Show callout for leaning and strain"></button>
+         <div id="callout-tags" class="callout" style="left: 60px; top: 110px;">
+          <div class="mini-label">
+           Ownership clue
+          </div>
+          <div class="mt-2 text-[22px] leading-[1.45] text-white font-semibold">
+           Look for the “J” suffix on SDG&amp;E tagging.
+          </div>
+          <p class="mt-2 text-[18px] leading-[1.5] text-slate-200">AT&amp;T-owned poles with SDG&amp;E attachments may also carry an AT&amp;T tag using a “JP” prefix.</p>
+         </div>
+         <div id="callout-clearance" class="callout" style="left: 650px; top: 85px;">
+          <div class="mini-label">
+           Inspection check
+          </div>
+          <div class="mt-2 text-[22px] leading-[1.45] text-white font-semibold">
+           Inspect both ground and wire-to-wire clearances.
+          </div>
+          <p class="mt-2 text-[18px] leading-[1.5] text-slate-200">These checks are required for CIP conductors on poles inter-set between SDG&amp;E poles.</p>
+         </div>
+         <div id="callout-strain" class="callout" style="right: 60px; bottom: 42px;">
+          <div class="mini-label">
+           Structural concern
+          </div>
+          <div class="mt-2 text-[22px] leading-[1.45] text-white font-semibold">
+           Watch for leaning or damaged CIP poles.
+          </div>
+          <p class="mt-2 text-[18px] leading-[1.5] text-slate-200">A compromised inter-set pole can place unnecessary strain on adjacent SDG&amp;E poles.</p>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </main>
+   </div>
+  </div>
+  <div id="image-modal" class="modal-overlay">
+   <div class="modal-content"><button class="modal-close-btn" aria-label="Close expanded image"> <i data-lucide="x" style="width: 24px; height: 24px;"></i> </button> <img id="modal-image" src="" alt="Expanded reference image" loading="lazy">
+   </div>
+  </div>
+  <script>
+    const STAGE_W = 1920;
+    const STAGE_H = 1080;
+
+    const wrapper = document.getElementById('sl-wrapper');
+    const stage = document.getElementById('sl-stage');
+
+    function scaleStage() {
+      const iframeW = wrapper.clientWidth;
+      const iframeH = wrapper.clientHeight;
+      const scale = Math.min(iframeW / STAGE_W, iframeH / STAGE_H);
+
+      stage.style.transform = `scale(${scale})`;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      scaleStage();
+    });
+    resizeObserver.observe(wrapper);
+    scaleStage();
+
+    const tabs = document.querySelectorAll('[data-tab]');
+    const panels = document.querySelectorAll('.tab-panel');
+    const progressText = document.querySelector('.footer-note.rounded-full');
+
+    const progressMap = {
+      ownership: '1 of 3 topics shown',
+      clearance: '2 of 3 topics shown',
+      strain: '3 of 3 topics shown'
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+
+        tabs.forEach((btn) => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-selected', 'false');
+        });
+
+        panels.forEach((panel) => panel.classList.add('hidden'));
+
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        document.getElementById(`panel-${target}`).classList.remove('hidden');
+
+        if (progressText && progressMap[target]) {
+          progressText.textContent = progressMap[target];
+        }
+
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    });
+
+    const hotspots = document.querySelectorAll('.hotspot');
+    const callouts = document.querySelectorAll('.callout');
+
+    // Image expansion functionality
+    const imageFrames = document.querySelectorAll('.image-frame');
+    const modal = document.getElementById('image-modal');
+    const modalImage = document.getElementById('modal-image');
+    const closeBtn = document.querySelector('.modal-close-btn');
+
+    imageFrames.forEach((frame) => {
+      frame.addEventListener('click', () => {
+        const img = frame.querySelector('img');
+        if (img && img.src) {
+          modalImage.src = img.src;
+          modalImage.alt = img.alt;
+          modal.classList.add('active');
+        }
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+      }
+    });
+
+
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e1ef322f0c40fcf',t:'MTc3NDQ1MjU1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
